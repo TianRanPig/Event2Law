@@ -23,6 +23,12 @@ def set_seed(seed, use_cuda=True):
 
 
 def train(config, model, train_iter, eval_iter):
+    if config.device.type == "cuda":
+        logger.info("CUDA enabled.")
+        model.to(config.device)
+        if len(config.device_ids) > 1:
+            logger.info("Use multi GPU", config.device_ids)
+            model = torch.nn.DataParallel(model, device_ids=config.device_ids)  # use multi GPU
     param_optimizer = list(model.named_parameters())
     no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
     optimizer_grouped_parameters = [
