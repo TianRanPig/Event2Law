@@ -1,5 +1,4 @@
 pytorch
-numpy
 easydict
 transformers
 tensorboard

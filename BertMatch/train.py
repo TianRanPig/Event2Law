@@ -97,7 +97,7 @@ def evaluate(model, data_iter):
 
 def start_training():
     logger.info('Start Loading Tokenizer')
-    tokenizer = BertTokenizer(vocab_file="../bert-base-chinese/vocab.txt")
+    tokenizer = BertTokenizer("../bert-pretrained/vocab.txt")
 
     config = BaseOptions().parse()
     config.writer = SummaryWriter(config.tensorboard_log_dir)
