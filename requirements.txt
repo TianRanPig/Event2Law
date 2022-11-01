@@ -1,0 +1,6 @@
+pytorch
+easydict
+transformers
+tensorboard
+scikit-learn
+tqdm

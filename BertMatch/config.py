@@ -26,8 +26,8 @@ class BaseOptions(object):
         self.parser.add_argument("--device_ids", type=int, nargs="+", default=[0], help="GPU ids to run the job")
         self.parser.add_argument("--data_ratio", default=1)
 
-        self.parser.add_argument("--train_path", type=str, default="../data/train.json")
-        self.parser.add_argument("--dev_path", type=str, default="../data/dev.json")
+        self.parser.add_argument("--train_path", type=str, default="data\\train.json")
+        self.parser.add_argument("--dev_path", type=str, default="data\\dev.json")
         # self.parser.add_argument("--test_path", type=str, default="../data/test.txt")
 
         self.parser.add_argument("--n_epochs", type=int, default=30, help="number of epochs to run")
@@ -38,7 +38,7 @@ class BaseOptions(object):
         self.parser.add_argument("--hidden_size", type=int, default=768)
 
         self.parser.add_argument("--max_length", type=int, default=512)
-        self.parser.add_argument("--bert_path", type=str, default="bert-base-chinese")
+        self.parser.add_argument("--bert_path", type=str, default="bert-pretrained")
 
     def parse(self):
         if not self.initialized:
@@ -51,6 +51,10 @@ class BaseOptions(object):
         opt.eval_log_filepath = os.path.join(opt.results_dir, self.eval_log_filename)
         opt.tensorboard_log_dir = os.path.join(opt.results_dir, self.tensorboard_log_dir)
         opt.device = torch.device("cuda:%d" % opt.device_ids[0] if opt.device >= 0 else "cpu")
+        opt.root_path = os.path.abspath('..')
+        opt.train_path = os.path.join(opt.root_path,opt.train_path)
+        opt.dev_path = os.path.join(opt.root_path, opt.dev_path)
+        opt.bert_path = os.path.join(opt.root_path, opt.bert_path)
         self.opt = opt
         return opt
 

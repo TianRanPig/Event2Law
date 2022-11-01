@@ -8,7 +8,7 @@ from transformers import BertTokenizer
 from BertMatch.config import BaseOptions
 from BertMatch.dataset import MyDataset, load_dataset
 
-# tokenizer = BertTokenizer(vocab_file="../bert-base-chinese/vocab.txt")
+# tokenizer = BertTokenizer(vocab_file="../bert-pretrained/vocab.txt")
 # examples = ["我爱北京天安门", "天安门广场"]
 #
 # res = tokenizer(examples,
