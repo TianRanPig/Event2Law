@@ -22,7 +22,7 @@ class BaseOptions(object):
         self.parser.add_argument("--model_name", type=str, default="bert")
         self.parser.add_argument("--results_root", type=str, default="results")
         self.parser.add_argument("--seed", type=int, default=2022, help="random seed")
-        self.parser.add_argument("--device", type=int, default=-1, help="0 cuda, -1 cpu")
+        self.parser.add_argument("--device", type=int, default=0, help="0 cuda, -1 cpu")
         self.parser.add_argument("--device_ids", type=int, nargs="+", default=[0], help="GPU ids to run the job")
         self.parser.add_argument("--data_ratio", default=1)
 

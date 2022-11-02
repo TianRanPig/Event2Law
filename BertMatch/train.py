@@ -11,7 +11,7 @@ from tqdm import tqdm, trange
 from transformers import BertTokenizer, AdamW
 
 from BertMatch.config import BaseOptions
-from BertMatch.dataset import MyDataset
+from BertMatch.dataset import MyDataset, prepare_batch_inputs
 from BertMatch.model import BertMatchModel
 
 
@@ -43,8 +43,9 @@ def train(config, model, train_iter, eval_iter):
     for epoch in trange(0, config.n_epochs, desc="Epoch"):
         # global_step = (epoch + 1) * len(train_iter)
         for i, inputs in tqdm(enumerate(train_iter),desc="Training Iteration",total=num_training_examples):
+            model_inputs = prepare_batch_inputs(inputs["model_inputs"], config.device)
             global_step = epoch * num_training_examples + i
-            loss, _ = model(inputs['model_inputs'])
+            loss, _ = model(model_inputs)
             model.zero_grad()
             loss.backward()
             optimizer.step()

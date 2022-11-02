@@ -14,6 +14,12 @@ def load_dataset(path):
             labels.append(int(data['label']))
     return events, laws, labels
 
+def prepare_batch_inputs(batched_model_inputs, device, non_blocking=False):
+    model_inputs = {}
+    for k, v in batched_model_inputs.items():
+        model_inputs[k] = v.to(device, non_blocking=non_blocking)
+    return model_inputs
+
 class MyDataset(Dataset):
     def __init__(self,path, tokenizer, max_length=512):
         self.events, self.laws, self.labels = load_dataset(path)
