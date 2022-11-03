@@ -22,9 +22,9 @@ class BaseOptions(object):
         self.parser.add_argument("--model_name", type=str, default="bert")
         self.parser.add_argument("--results_root", type=str, default="results")
         self.parser.add_argument("--seed", type=int, default=2022, help="random seed")
-        self.parser.add_argument("--device", type=int, default=0, help="0 cuda, -1 cpu")
+        self.parser.add_argument("--device", type=int, default=-1, help="0 cuda, -1 cpu")
         self.parser.add_argument("--device_ids", type=int, nargs="+", default=[0], help="GPU ids to run the job")
-        self.parser.add_argument("--data_ratio", default=1)
+        self.parser.add_argument("--data_ratio", default=0.01)
 
         self.parser.add_argument("--train_path", type=str, default="data\\train.json")
         self.parser.add_argument("--dev_path", type=str, default="data\\dev.json")
@@ -32,13 +32,18 @@ class BaseOptions(object):
 
         self.parser.add_argument("--n_epochs", type=int, default=30, help="number of epochs to run")
         self.parser.add_argument("--max_es_cnt", type=int, default=5, help="number of epochs to early stop, use -1 to disable early stop")
-        self.parser.add_argument("--batch_size", type=int, default=4, help="mini-batch size")
+        self.parser.add_argument("--batch_size", type=int, default=2, help="mini-batch size")
         self.parser.add_argument("--lr", type=float, default=2e-5, help="learning rate")
         self.parser.add_argument("--epsilon", type=float, default=1e-6, help="AdamW epsilon")
         self.parser.add_argument("--hidden_size", type=int, default=768)
 
         self.parser.add_argument("--max_length", type=int, default=512)
         self.parser.add_argument("--bert_path", type=str, default="bert-pretrained")
+
+    def display_save(self, opt):
+        args = vars(opt)
+        # Display settings
+        print("------------ Options -------------\n{}\n-------------------".format({str(k): str(v) for k, v in sorted(args.items())}))
 
     def parse(self):
         if not self.initialized:
@@ -55,7 +60,9 @@ class BaseOptions(object):
         opt.train_path = os.path.join(opt.root_path,opt.train_path)
         opt.dev_path = os.path.join(opt.root_path, opt.dev_path)
         opt.bert_path = os.path.join(opt.root_path, opt.bert_path)
+        opt.vocab_path = os.path.join(opt.bert_path, "vocab.txt")
         self.opt = opt
+        self.display_save(opt)
         return opt
 
 

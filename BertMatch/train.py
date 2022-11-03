@@ -56,7 +56,7 @@ def train(config, model, train_iter, eval_iter):
             f.write(to_write)
 
         if eval_iter is not None:
-            eval_acc, eval_loss = evaluate(model, eval_iter)
+            eval_acc, eval_loss = evaluate(config, model, eval_iter)
             to_write = config.eval_log_txt_formatter.format(time_str=time.strftime("%Y_%m_%d_%H_%M_%S"), epoch=epoch, eval_acc=eval_acc,eval_loss=eval_loss)
             with open(config.eval_log_filepath, 'a', encoding='utf-8') as f:
                 f.write(to_write)
@@ -64,8 +64,8 @@ def train(config, model, train_iter, eval_iter):
             if stop_score > prev_best_score:
                 es_cnt = 0
                 prev_best_score = stop_score
-                checkpoint = {"model": model.state_dict(), "model_cfg": model.config, "epoch": epoch}
-                torch.save(checkpoint, config.ckpt_filepath)
+                # checkpoint = {"model": model.state_dict(), "model_cfg": model.config, "epoch": epoch}
+                torch.save(model.state_dict(), config.ckpt_filepath)
                 logger.info("The checkpoint file has been updated.")
             else:
                 es_cnt += 1
@@ -75,11 +75,11 @@ def train(config, model, train_iter, eval_iter):
                     logger.info("Early stop at {}".format(epoch))
                     break
         else:
-            checkpoint = {"model": model.state_dict(), "model_cfg": model.config, "epoch": epoch}
-            torch.save(checkpoint, config.ckpt_filepath)
+            # checkpoint = {"model": model.state_dict(), "model_cfg": model.config, "epoch": epoch}
+            torch.save(model.state_dict(), config.ckpt_filepath)
     config.writer.close()
 
-def evaluate(model, data_iter):
+def evaluate(config, model, data_iter):
     model.eval()
     loss_total = 0
     predict_all = np.array([], dtype=int)
@@ -87,10 +87,13 @@ def evaluate(model, data_iter):
     logger.info('Evaluating .....')
     with torch.no_grad():
         for i, inputs in tqdm(enumerate(data_iter), desc="Evaluating Iteration", total=len(data_iter)):
-            loss, output = model(inputs['model_inputs'])
+            model_inputs = prepare_batch_inputs(inputs["model_inputs"], config.device)
+            loss, output = model(model_inputs)
             loss_total += loss
-            labels = inputs['labels'].data.numpy()
-            predict = torch.max(output.data, 1)[1].numpy()
+            labels = inputs['model_inputs']['labels'].data.numpy()
+            one = torch.ones_like(output)
+            zero = torch.zeros_like(output)
+            predict = torch.where(output > 0.5, one, zero).data.numpy()
             labels_all = np.append(labels_all, labels)
             predict_all = np.append(predict_all, predict)
     acc = metrics.accuracy_score(labels_all, predict_all)
@@ -106,7 +109,7 @@ def start_training():
     config.eval_log_txt_formatter = "{time_str} [Epoch] {epoch:03d} [acc] {eval_acc} [Loss] {eval_loss}\n"
 
     set_seed(config.seed)
-    train_data = MyDataset(config.train_path, tokenizer)
+    train_data = MyDataset(config.train_path, tokenizer, data_ratio=config.data_ratio)
     eval_data = MyDataset(config.dev_path, tokenizer)
     train_iter = DataLoader(train_data,batch_size=config.batch_size,shuffle=True)
     eval_iter = DataLoader(eval_data,batch_size=config.batch_size,shuffle=True)

@@ -6,6 +6,7 @@ from transformers import BertModel
 class BertMatchModel(nn.Module):
     def __init__(self, config):
         super(BertMatchModel, self).__init__()
+        self.config = config
         self.bert = BertModel.from_pretrained(config.bert_path)
         self.loss_fct = nn.MSELoss()
         self.cos_score_transformation = nn.Identity()

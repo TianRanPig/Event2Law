@@ -1,5 +1,6 @@
 import json
 from torch.utils.data import Dataset
+from logger import logger
 
 
 def load_dataset(path):
@@ -21,8 +22,14 @@ def prepare_batch_inputs(batched_model_inputs, device, non_blocking=False):
     return model_inputs
 
 class MyDataset(Dataset):
-    def __init__(self,path, tokenizer, max_length=512):
+    def __init__(self, path, tokenizer, max_length=512, data_ratio=1.0):
         self.events, self.laws, self.labels = load_dataset(path)
+        if data_ratio != 1:
+            n_examples = int(len(self.events) * data_ratio)
+            self.events = self.events[:n_examples]
+            self.laws = self.laws[:n_examples]
+            self.labels = self.labels[:n_examples]
+            logger.info("Using {}% of the data: {} examples".format(data_ratio * 100, n_examples))
         self.events_feature = tokenizer(self.events, padding=True, truncation=True, max_length=max_length, return_tensors="pt", return_length=True)
         self.laws_feature = tokenizer(self.laws, padding=True, truncation=True, max_length=max_length, return_tensors="pt", return_length=True)
 
