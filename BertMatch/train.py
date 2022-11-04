@@ -58,8 +58,8 @@ def train(config, model, train_iter, eval_iter):
             f.write(to_write)
 
         if eval_iter is not None:
-            eval_acc, eval_loss = evaluate(config, model, eval_iter)
-            to_write = config.eval_log_txt_formatter.format(time_str=time.strftime("%Y_%m_%d_%H_%M_%S"), epoch=epoch, eval_acc=eval_acc,eval_loss=eval_loss)
+            eval_acc, eval_pre, eval_loss = evaluate(config, model, eval_iter)
+            to_write = config.eval_log_txt_formatter.format(time_str=time.strftime("%Y_%m_%d_%H_%M_%S"), epoch=epoch, eval_acc=eval_acc, eval_pre=eval_pre, eval_loss=eval_loss)
             with open(config.eval_log_filepath, 'a', encoding='utf-8') as f:
                 f.write(to_write)
             stop_score = eval_loss
@@ -98,8 +98,9 @@ def evaluate(config, model, data_iter):
             predict = torch.where(output > 0.5, one, zero).data.numpy()
             labels_all = np.append(labels_all, labels)
             predict_all = np.append(predict_all, predict)
-    acc = metrics.accuracy_score(labels_all, predict_all)
-    return acc, loss_total / len(data_iter)
+    accuracy = metrics.accuracy_score(labels_all, predict_all)
+    precision = metrics.precision_score(labels_all, predict_all)
+    return accuracy, precision, loss_total / len(data_iter)
 
 def start_training():
     logger.info('Start Loading Tokenizer')
@@ -108,7 +109,7 @@ def start_training():
     config = BaseOptions().parse()
     config.writer = SummaryWriter(config.tensorboard_log_dir)
     config.train_log_txt_formatter = "{time_str} [Epoch] {epoch:03d} [Loss] {loss_str}\n"
-    config.eval_log_txt_formatter = "{time_str} [Epoch] {epoch:03d} [acc] {eval_acc} [Loss] {eval_loss}\n"
+    config.eval_log_txt_formatter = "{time_str} [Epoch] {epoch:03d} [accuracy] {eval_acc} [precision] {eval_pre} [Loss] {eval_loss}\n"
 
     set_seed(config.seed)
     train_data = MyDataset(config.train_path, tokenizer, data_ratio=config.data_ratio)
