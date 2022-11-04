@@ -33,7 +33,7 @@ class BaseOptions(object):
         self.parser.add_argument("--n_epochs", type=int, default=30, help="number of epochs to run")
         self.parser.add_argument("--max_es_cnt", type=int, default=5, help="number of epochs to early stop, use -1 to disable early stop")
         self.parser.add_argument("--batch_size", type=int, default=2, help="mini-batch size")
-        self.parser.add_argument("--lr", type=float, default=2e-5, help="learning rate")
+        self.parser.add_argument("--lr", type=float, default=1e-5, help="learning rate")
         self.parser.add_argument("--epsilon", type=float, default=1e-6, help="AdamW epsilon")
         self.parser.add_argument("--hidden_size", type=int, default=768)
 

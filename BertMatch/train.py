@@ -41,17 +41,19 @@ def train(config, model, train_iter, eval_iter):
     logger.info("Start Training ......")
     model.train()
     for epoch in trange(0, config.n_epochs, desc="Epoch"):
+        epoch_loss = 0
         # global_step = (epoch + 1) * len(train_iter)
         for i, inputs in tqdm(enumerate(train_iter),desc="Training Iteration",total=num_training_examples):
             model_inputs = prepare_batch_inputs(inputs["model_inputs"], config.device)
             global_step = epoch * num_training_examples + i
             loss, _ = model(model_inputs)
+            epoch_loss = loss
             model.zero_grad()
             loss.backward()
             optimizer.step()
             config.writer.add_scalar("Train/LR", float(optimizer.param_groups[0]["lr"]), global_step)
             config.writer.add_scalar("Train/Loss", float(loss), global_step)
-        to_write = config.train_log_txt_formatter.format(time_str=time.strftime("%Y_%m_%d_%H_%M_%S"), epoch=epoch, loss_str=loss)
+        to_write = config.train_log_txt_formatter.format(time_str=time.strftime("%Y_%m_%d_%H_%M_%S"), epoch=epoch, loss_str=epoch_loss)
         with open(config.train_log_filepath, "a", encoding='utf-8') as f:
             f.write(to_write)
 
@@ -66,7 +68,7 @@ def train(config, model, train_iter, eval_iter):
                 prev_best_score = stop_score
                 # checkpoint = {"model": model.state_dict(), "model_cfg": model.config, "epoch": epoch}
                 torch.save(model.state_dict(), config.ckpt_filepath)
-                logger.info("The checkpoint file has been updated.")
+                logger.info("The checkpoint file has been updated.\n")
             else:
                 es_cnt += 1
                 if config.max_es_cnt != -1 and es_cnt > config.max_es_cnt:
